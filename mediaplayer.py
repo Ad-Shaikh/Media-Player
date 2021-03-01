@@ -20,7 +20,7 @@ class Window(QWidget):
 
     self.ui()
     self.show() 
-    
+
   def ui(self):
 
     # create media player object 
@@ -36,8 +36,20 @@ class Window(QWidget):
     # create button for playing
     self.playbtn = QPushButton()
     self.playbtn.setEnabled(False)
+    self.playbtn.setStyleSheet('background-color : black')
     self.playbtn.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
     self.playbtn.clicked.connect(self.play_video)
+
+    # create button for forward 
+    self.fbtn = QPushButton()
+    self.fbtn.setStyleSheet('background-color : black')
+    self.fbtn.setIcon(QIcon('forward.png'))
+
+    # create button for backward 
+    self.bbtn = QPushButton()
+    self.bbtn.setStyleSheet('background-color : black')
+    self.bbtn.setIcon(QIcon('backward.png'))
+
 
     #create content slider
     self.slider = QSlider(Qt.Horizontal)
@@ -63,13 +75,13 @@ class Window(QWidget):
 
     # set widgets to the hbox layout
     hboxLayout.addWidget(openbtn)
+    hboxLayout.addWidget(self.bbtn)
     hboxLayout.addWidget(self.playbtn)
+    hboxLayout.addWidget(self.fbtn)
     hboxLayout.addWidget(self.slider)
     hboxLayout.addWidget(self.vlabel)
     hboxLayout.addWidget(self.sld )
-
-    
-
+      
     #create vbox layout
     vboxlayout = QVBoxLayout()
     vboxlayout.addWidget(videowidget)
@@ -123,6 +135,7 @@ class Window(QWidget):
     self.label.setText("Error: " + self.mediaPlayer.errorString())
 
   def changeValue(self, value):
+    self.volume = value
     if value == 0:
       self.vlabel.setPixmap(QPixmap('mute.png'))
     elif 0 < value <= 30:
