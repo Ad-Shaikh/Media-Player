@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QApplication,QWidget,QHBoxLayout,QPushButton,QVBoxLa
 import sys 
 from PyQt5.QtMultimedia import QMediaPlayer,QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt,QUrl
 
 class Window(QWidget):
@@ -38,23 +39,36 @@ class Window(QWidget):
     self.playbtn.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
     self.playbtn.clicked.connect(self.play_video)
 
-    #create slider
+    #create content slider
     self.slider = QSlider(Qt.Horizontal)
     self.slider.setRange(0,0)
     self.slider.sliderMoved.connect(self.set_position)
+
+    #create volume slider
+    
+    self.sld = QSlider(Qt.Horizontal, self)
+    self.sld.setFocusPolicy(Qt.NoFocus)
+    self.sld.valueChanged.connect(self.changeValue)
 
     #create label
     self.label = QLabel()
     self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
 
+    #create vol label
+    self.vlabel = QLabel(self)
+    self.vlabel.setPixmap(QPixmap('mute.png'))
+
     # create hbox layout
     hboxLayout = QHBoxLayout()
-    hboxLayout.setContentsMargins(0,0,0,0)
 
     # set widgets to the hbox layout
     hboxLayout.addWidget(openbtn)
     hboxLayout.addWidget(self.playbtn)
     hboxLayout.addWidget(self.slider)
+    hboxLayout.addWidget(self.vlabel)
+    hboxLayout.addWidget(self.sld )
+
+    
 
     #create vbox layout
     vboxlayout = QVBoxLayout()
@@ -77,6 +91,7 @@ class Window(QWidget):
     if filename != '':   
       self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(filename)))
       self.playbtn.setEnabled(True)
+      self.mediaPlayer.play()
 
   def play_video(self):
     if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
@@ -99,14 +114,24 @@ class Window(QWidget):
 
   def duration_changed(self, duration):
     self.slider.setRange(0, duration)
-  
+
   def set_position(self, position):
     self.mediaPlayer.setPosition(position)
   
   def handle_errors(self):
     self.playbtn.setEnabled(False)
     self.label.setText("Error: " + self.mediaPlayer.errorString())
-    
+
+  def changeValue(self, value):
+    if value == 0:
+      self.vlabel.setPixmap(QPixmap('mute.png'))
+    elif 0 < value <= 30:
+      self.vlabel.setPixmap(QPixmap('min.png'))
+    elif 30 < value < 80:
+      self.vlabel.setPixmap(QPixmap('med.png'))
+    else:
+      self.vlabel.setPixmap(QPixmap('max.png'))
+
 
 app = QApplication(sys.argv)
 window = Window()
