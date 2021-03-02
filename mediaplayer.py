@@ -1,18 +1,18 @@
-from PyQt5.QtGui import QIcon, QPalette
-from PyQt5.QtWidgets import QApplication,QWidget,QHBoxLayout,QPushButton,QVBoxLayout,QLabel,QSlider,QStyle, QSizePolicy,QFileDialog
+from PyQt5.QtGui import QIcon, QPalette,QKeySequence
+from PyQt5.QtWidgets import QApplication,QWidget,QHBoxLayout,QPushButton,QVBoxLayout,QLabel,QSlider,QStyle, QSizePolicy,QFileDialog,QShortcut
 import sys 
 from PyQt5.QtMultimedia import QMediaPlayer,QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt,QUrl
+from PyQt5.QtCore import Qt,QUrl,QPoint
 
 class Window(QWidget):
-  def __init__(self):
-    super().__init__()
+  def __init__(self, parent=None):
+    super(Window, self).__init__(parent)
 
     self.setWindowTitle("Media Player")
     self.setGeometry(450, 200, 1000, 700)
-    self.setWindowIcon(QIcon('icon.png'))
+    self.setWindowIcon(QIcon('icons/icon.png'))
 
     palette = self.palette()
     palette.setColor(QPalette.Window, Qt.black)
@@ -30,25 +30,40 @@ class Window(QWidget):
     videowidget = QVideoWidget()
 
     # create open button
-    openbtn = QPushButton('Open Video')
-    openbtn.clicked.connect(self.open_file)
+    self.openbtn = QPushButton('Open Video', self)  
+    self.openbtn.setIcon(QIcon('icons/open.png'))
+    self.openbtn.setFixedHeight(30);
+    self.openbtn.setMaximumWidth(100);
+    self.openbtn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
+    self.openbtn.setStyleSheet('background-color : black ; color : white')
+    self.openbtn.clicked.connect(self.open_file)
+
+    #create settings button
+    self.settingbtn = QPushButton('Setting')
+    self.settingbtn.setStyleSheet('background-color : black; color : white')
+    self.settingbtn.setIcon(QIcon('icons/settings.png'))
+    self.settingbtn.setFixedHeight(30);
+    self.settingbtn.setMaximumWidth(100);
+    self.settingbtn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
+    
+    # self.settingbtn.clicked.connect(self.open_file)
 
     # create button for playing
     self.playbtn = QPushButton()
     self.playbtn.setEnabled(False)
     self.playbtn.setStyleSheet('background-color : black')
-    self.playbtn.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
+    self.playbtn.setIcon(QIcon('icons/play.png'))
     self.playbtn.clicked.connect(self.play_video)
 
     # create button for forward 
     self.fbtn = QPushButton()
     self.fbtn.setStyleSheet('background-color : black')
-    self.fbtn.setIcon(QIcon('forward.png'))
+    self.fbtn.setIcon(QIcon('icons/forward.png'))
 
     # create button for backward 
     self.bbtn = QPushButton()
     self.bbtn.setStyleSheet('background-color : black')
-    self.bbtn.setIcon(QIcon('backward.png'))
+    self.bbtn.setIcon(QIcon('icons/backward.png'))
 
 
     #create content slider
@@ -61,6 +76,9 @@ class Window(QWidget):
     self.sld = QSlider(Qt.Horizontal, self)
     self.sld.setFocusPolicy(Qt.NoFocus)
     self.sld.valueChanged.connect(self.changeValue)
+    self.sld.setMaximumWidth(100);
+    self.sld.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+    
 
     #create label
     self.label = QLabel()
@@ -68,22 +86,31 @@ class Window(QWidget):
 
     #create vol label
     self.vlabel = QLabel(self)
-    self.vlabel.setPixmap(QPixmap('mute.png'))
+    self.vlabel.setPixmap(QPixmap('icons/mute.png'))
 
     # create hbox layout
     hboxLayout = QHBoxLayout()
 
     # set widgets to the hbox layout
-    hboxLayout.addWidget(openbtn)
     hboxLayout.addWidget(self.bbtn)
     hboxLayout.addWidget(self.playbtn)
     hboxLayout.addWidget(self.fbtn)
     hboxLayout.addWidget(self.slider)
     hboxLayout.addWidget(self.vlabel)
     hboxLayout.addWidget(self.sld )
-      
-    #create vbox layout
+
+    # topbox
+
+    tboxLayout=QHBoxLayout()
+    tboxLayout.setAlignment(Qt.AlignLeft)
+    tboxLayout.addWidget(self.openbtn)
+    tboxLayout.addWidget(self.settingbtn)
+
+
+
+    #create vbox layout 
     vboxlayout = QVBoxLayout()
+    vboxlayout.addLayout(tboxLayout)
     vboxlayout.addWidget(videowidget)
     vboxlayout.addLayout(hboxLayout)
     vboxlayout.addWidget(self.label)
@@ -95,7 +122,23 @@ class Window(QWidget):
     self.mediaPlayer.stateChanged.connect(self.mediastate_changed)
     self.mediaPlayer.positionChanged.connect(self.position_changed)
     self.mediaPlayer.durationChanged.connect(self.duration_changed)
+
+    self.widescreen = True
       
+    #shortcuts
+    self.shortcut = QShortcut(QKeySequence('Ctrl+O'), self)
+    self.shortcut.activated.connect(self.open_file)
+    self.shortcut = QShortcut(QKeySequence('h'), self)
+    self.shortcut.activated.connect(self.toggleSlider)
+    self.shortcut = QShortcut(QKeySequence(Qt.Key_Up), self)
+    self.shortcut.activated.connect(self.volumeUp)
+    self.shortcut = QShortcut(QKeySequence(Qt.Key_Down), self)
+    self.shortcut.activated.connect(self.volumeDown) 
+
+
+  # function section    
+  def mouseDoubleClickEvent(self, event):
+    self.handleFullscreen()
 
   def open_file(self):
     filename, _ =QFileDialog.getOpenFileName(self, "Open Good Files ") 
@@ -114,11 +157,11 @@ class Window(QWidget):
   def mediastate_changed(self,state):
     if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
       self.playbtn.setIcon(
-        self.style().standardIcon(QStyle.SP_MediaPause)
+        QIcon('icons/pause.png')
       )
     else:
       self.playbtn.setIcon(
-        self.style().standardIcon(QStyle.SP_MediaPlay)
+        QIcon('icons/play.png')
       )
 
   def position_changed(self, position):
@@ -137,14 +180,71 @@ class Window(QWidget):
   def changeValue(self, value):
     self.volume = value
     if value == 0:
-      self.vlabel.setPixmap(QPixmap('mute.png'))
+      self.vlabel.setPixmap(QPixmap('icons/mute.png'))
     elif 0 < value <= 30:
-      self.vlabel.setPixmap(QPixmap('min.png'))
+      self.vlabel.setPixmap(QPixmap('icons/min.png'))
     elif 30 < value < 80:
-      self.vlabel.setPixmap(QPixmap('med.png'))
+      self.vlabel.setPixmap(QPixmap('icons/med.png'))
     else:
-      self.vlabel.setPixmap(QPixmap('max.png'))
+      self.vlabel.setPixmap(QPixmap('icons/max.png'))
 
+  # def changeVolume(self, value):
+  #   self.volume = value
+
+  def volumeUp(self):
+    self.mediaPlayer.setVolume(self.mediaPlayer.volume() + 10)
+    print("Volume: " + str(self.mediaPlayer.volume()))
+    
+  def volumeDown(self):
+    self.mediaPlayer.setVolume(self.mediaPlayer.volume() - 10)
+    print("Volume: " + str(self.mediaPlayer.volume()))
+  
+  def mousePressEvent(self, evt):
+    self.oldPos = evt.globalPos()
+
+  def mouseMoveEvent(self, evt):
+    delta = QPoint(evt.globalPos() - self.oldPos)
+    self.move(self.x() + delta.x(), self.y() + delta.y())
+    self.oldPos = evt.globalPos()
+
+  # full screen on double click
+  def handleFullscreen(self):
+    if self.windowState() & Qt.WindowFullScreen:
+      QApplication.setOverrideCursor(Qt.ArrowCursor)
+      self.showNormal()
+      print("no Fullscreen")
+    else:
+      self.showFullScreen()
+      QApplication.setOverrideCursor(Qt.BlankCursor)
+      print("Fullscreen entered")
+
+  def toggleSlider(self):    
+    if self.slider.isVisible():
+      self.hideSlider()
+    else:
+      self.showSlider()
+    
+  def hideSlider(self):
+    self.openbtn.hide()
+    self.settingbtn.hide()
+    self.bbtn.hide()
+    self.playbtn.hide()
+    self.fbtn.hide()
+    self.label.hide()
+    self.vlabel.hide()
+    self.slider.hide()
+    self.sld.hide()
+  
+  def showSlider(self):
+    self.openbtn.show()
+    self.settingbtn.show()
+    self.bbtn.show()
+    self.playbtn.show()
+    self.fbtn.show()
+    self.label.show()
+    self.vlabel.show()
+    self.slider.show()
+    self.sld.show()
 
 app = QApplication(sys.argv)
 window = Window()
