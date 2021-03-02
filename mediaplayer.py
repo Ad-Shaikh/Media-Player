@@ -45,7 +45,6 @@ class Window(QWidget):
     self.settingbtn.setFixedHeight(30);
     self.settingbtn.setMaximumWidth(100);
     self.settingbtn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
-    self.settingbtn.clicked.connect(self.contextMenuRequested)
 
     
     # self.settingbtn.clicked.connect(self.open_file)
@@ -275,30 +274,6 @@ class Window(QWidget):
     self.slider.show()
     self.sld.show()
 
-  def contextMenuRequested(self,point):
-    menu = QMenu()
-    # actionURL = menu.addAction(QIcon.fromTheme("browser"),"URL from Clipboard (u)")
-    # actionclipboard = menu.addSeparator() 
-    # actionYTurl = menu.addAction(QIcon.fromTheme("youtube"), "URL from YouTube (y)")
-    # actionclipboard = menu.addSeparator() 
-    actionToggle = menu.addAction(QIcon.fromTheme("next"),"show / hide Slider (h)") 
-    actionFull = menu.addAction(QIcon.fromTheme("view-fullscreen"),"Fullscreen (f)")
-    # action169 = menu.addAction(QIcon.fromTheme("tv-symbolic"),"16 : 9")
-    # action43 = menu.addAction(QIcon.fromTheme("tv-symbolic"),"4 : 3")
-    # actionSep = menu.addSeparator()
-    # actionInfo = menu.addAction(QIcon.fromTheme("help-about"),"Info (i)")
-    # action5 = menu.addSeparator() 
-    # actionQuit = menu.addAction(QIcon.fromTheme("application-exit"),"Exit (q)")
-
-    # actionQuit.triggered.connect(self.handleQuit)
-    actionFull.triggered.connect(self.handleFullscreen)
-    # actionInfo.triggered.connect(self.handleInfo)
-    actionToggle.triggered.connect(self.toggleSlider)
-    # actionURL.triggered.connect(self.playFromURL)
-    # actionYTurl.triggered.connect(self.getYTUrl)
-    # action169.triggered.connect(self.screen169)
-    # action43.triggered.connect(self.screen43)
-    menu.exec_(self.mapToGlobal(point))
 
 app = QApplication(sys.argv)
 window = Window()
