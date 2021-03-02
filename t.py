@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QIcon, QPalette,QKeySequence
-from PyQt5.QtWidgets import QApplication,QWidget,QHBoxLayout,QPushButton,QVBoxLayout,QLabel,QSlider,QStyle, QSizePolicy,QFileDialog,QShortcut,QMenu
+from PyQt5.QtWidgets import QApplication,QWidget,QHBoxLayout,QPushButton,QVBoxLayout,QLabel,QSlider,QStyle, QSizePolicy,QFileDialog,QShortcut
 import sys 
 from PyQt5.QtMultimedia import QMediaPlayer,QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
@@ -45,8 +45,6 @@ class Window(QWidget):
     self.settingbtn.setFixedHeight(30);
     self.settingbtn.setMaximumWidth(100);
     self.settingbtn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
-    self.settingbtn.clicked.connect(self.contextMenuRequested)
-
     
     # self.settingbtn.clicked.connect(self.open_file)
 
@@ -72,19 +70,17 @@ class Window(QWidget):
 
     #create content slider
     self.slider = QSlider(Qt.Horizontal)
-    self.slider.setRange(0,0)
+    self.slider.setRange(0,100)
     self.slider.sliderMoved.connect(self.set_position)
 
     #create volume slider
     
     self.sld = QSlider(Qt.Horizontal, self)
     self.sld.setFocusPolicy(Qt.NoFocus)
-    self.sld.setRange(0,100)
     self.sld.valueChanged.connect(self.changeValue)
-    self.sld.sliderMoved.connect(self.set_volume)
     self.sld.setMaximumWidth(100);
     self.sld.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        
+    
 
     #create label
     self.label = QLabel()
@@ -128,7 +124,6 @@ class Window(QWidget):
     self.mediaPlayer.stateChanged.connect(self.mediastate_changed)
     self.mediaPlayer.positionChanged.connect(self.position_changed)
     self.mediaPlayer.durationChanged.connect(self.duration_changed)
-    self.mediaPlayer.positionChanged.connect(self.volume_changed)  
 
     self.widescreen = True
       
@@ -140,7 +135,7 @@ class Window(QWidget):
     self.shortcut = QShortcut(QKeySequence(Qt.Key_Up), self)
     self.shortcut.activated.connect(self.volumeUp)
     self.shortcut = QShortcut(QKeySequence(Qt.Key_Down), self)
-    self.shortcut.activated.connect(self.volumeDown)
+    self.shortcut.activated.connect(self.volumeDown) 
     self.shortcut = QShortcut(QKeySequence(Qt.Key_Right), self)
     self.shortcut.activated.connect(self.forwardSlider)
     self.shortcut = QShortcut(QKeySequence(Qt.Key_Left), self)
@@ -192,12 +187,6 @@ class Window(QWidget):
     self.playbtn.setEnabled(False)
     self.label.setText("Error: " + self.mediaPlayer.errorString())
 
-  def set_volume(self, position):
-    self.mediaPlayer.setVolume(position)
-  
-  def volume_changed(self, position):
-    self.slider.setValue(position)
-
   def changeValue(self, value):
     self.volume = value
     if value == 0:
@@ -214,14 +203,10 @@ class Window(QWidget):
 
   def volumeUp(self):
     self.mediaPlayer.setVolume(self.mediaPlayer.volume() + 10)
-    self.set_volume(position=self.mediaPlayer.volume())
-    # self.volume_changed(position=self.mediaPlayer.volume())
     print("Volume: " + str(self.mediaPlayer.volume()))
     
   def volumeDown(self):
     self.mediaPlayer.setVolume(self.mediaPlayer.volume() - 10)
-    self.set_volume(position=self.mediaPlayer.volume())
-    # self.volume_changed(position=self.mediaPlayer.volume())
     print("Volume: " + str(self.mediaPlayer.volume()))
 
   def forwardSlider(self):
@@ -274,31 +259,6 @@ class Window(QWidget):
     self.vlabel.show()
     self.slider.show()
     self.sld.show()
-
-  def contextMenuRequested(self,point):
-    menu = QMenu()
-    # actionURL = menu.addAction(QIcon.fromTheme("browser"),"URL from Clipboard (u)")
-    # actionclipboard = menu.addSeparator() 
-    # actionYTurl = menu.addAction(QIcon.fromTheme("youtube"), "URL from YouTube (y)")
-    # actionclipboard = menu.addSeparator() 
-    actionToggle = menu.addAction(QIcon.fromTheme("next"),"show / hide Slider (h)") 
-    actionFull = menu.addAction(QIcon.fromTheme("view-fullscreen"),"Fullscreen (f)")
-    # action169 = menu.addAction(QIcon.fromTheme("tv-symbolic"),"16 : 9")
-    # action43 = menu.addAction(QIcon.fromTheme("tv-symbolic"),"4 : 3")
-    # actionSep = menu.addSeparator()
-    # actionInfo = menu.addAction(QIcon.fromTheme("help-about"),"Info (i)")
-    # action5 = menu.addSeparator() 
-    # actionQuit = menu.addAction(QIcon.fromTheme("application-exit"),"Exit (q)")
-
-    # actionQuit.triggered.connect(self.handleQuit)
-    actionFull.triggered.connect(self.handleFullscreen)
-    # actionInfo.triggered.connect(self.handleInfo)
-    actionToggle.triggered.connect(self.toggleSlider)
-    # actionURL.triggered.connect(self.playFromURL)
-    # actionYTurl.triggered.connect(self.getYTUrl)
-    # action169.triggered.connect(self.screen169)
-    # action43.triggered.connect(self.screen43)
-    menu.exec_(self.mapToGlobal(point))
 
 app = QApplication(sys.argv)
 window = Window()
