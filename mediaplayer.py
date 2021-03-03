@@ -1,10 +1,10 @@
 from PyQt5.QtGui import QIcon, QPalette,QKeySequence
-from PyQt5.QtWidgets import QApplication,QWidget,QHBoxLayout,QPushButton,QVBoxLayout,QLabel,QSlider,QStyle, QSizePolicy,QFileDialog,QShortcut,QMenu
+from PyQt5.QtWidgets import QApplication,QWidget,QHBoxLayout,QPushButton,QVBoxLayout,QLabel,QSlider,QStyle, QSizePolicy,QFileDialog,QShortcut,QMenu, QAction,QMenuBar,QLineEdit
 import sys 
 from PyQt5.QtMultimedia import QMediaPlayer,QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt,QUrl,QPoint
+from PyQt5.QtCore import Qt,QUrl,QPoint,QTime
 
 class Window(QWidget):
   def __init__(self, parent=None):
@@ -38,16 +38,24 @@ class Window(QWidget):
     self.openbtn.setStyleSheet('background-color : black ; color : white')
     self.openbtn.clicked.connect(self.open_file)
 
-    #create settings button
-    self.settingbtn = QPushButton('Setting')
-    self.settingbtn.setStyleSheet('background-color : black; color : white')
-    self.settingbtn.setIcon(QIcon('icons/settings.png'))
-    self.settingbtn.setFixedHeight(30);
-    self.settingbtn.setMaximumWidth(100);
-    self.settingbtn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
-
+    #create settings button dropdown
     
-    # self.settingbtn.clicked.connect(self.open_file)
+    settingbtn = QMenuBar()
+    actionFile = settingbtn.addMenu(QIcon('icons/settings.png'),'&Setting')
+    settingbtn.setStyleSheet('background-color : black; color : white')
+    actionFile.addAction("New")
+    actionFile.addAction("Open")
+    actionFile.addAction("Save")
+    actionFile.addSeparator()
+    exit = QAction(QIcon('icons/exit.png'), 'Exit', self)
+    exit.setShortcut('Ctrl+Q')
+    exit.setStatusTip('Exit application')
+    exit.triggered.connect(app.quit)
+    actionFile.addAction(exit) 
+
+    settingbtn.setFixedHeight(30)
+    settingbtn.setMaximumWidth(200)
+    settingbtn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
 
     # create button for playing
     self.playbtn = QPushButton()
@@ -71,8 +79,25 @@ class Window(QWidget):
 
     #create content slider
     self.slider = QSlider(Qt.Horizontal)
+    self.slider.setFocusPolicy(Qt.NoFocus)
     self.slider.setRange(0,0)
     self.slider.sliderMoved.connect(self.set_position)
+
+    self.lbl = QLineEdit('00:00:00')
+    
+    self.lbl.setReadOnly(True)
+    self.lbl.setFixedWidth(70)
+    self.lbl.setUpdatesEnabled(True)
+    self.lbl.setStyleSheet('background-color : black; color : white; border : none')
+    self.lbl.selectionChanged.connect(lambda: self.lbl.setSelection(0, 0))
+    
+    self.elbl = QLineEdit('00:00:00')
+  
+    self.elbl.setReadOnly(True)
+    self.elbl.setFixedWidth(70)
+    self.elbl.setUpdatesEnabled(True)
+    self.elbl.setStyleSheet('background-color : black; color : white; border : none')
+    self.elbl.selectionChanged.connect(lambda: self.elbl.setSelection(0, 0))
 
     #create volume slider
     
@@ -100,7 +125,9 @@ class Window(QWidget):
     hboxLayout.addWidget(self.bbtn)
     hboxLayout.addWidget(self.playbtn)
     hboxLayout.addWidget(self.fbtn)
+    hboxLayout.addWidget(self.lbl)
     hboxLayout.addWidget(self.slider)
+    hboxLayout.addWidget(self.elbl)
     hboxLayout.addWidget(self.vlabel)
     hboxLayout.addWidget(self.sld )
 
@@ -109,7 +136,7 @@ class Window(QWidget):
     tboxLayout=QHBoxLayout()
     tboxLayout.setAlignment(Qt.AlignLeft)
     tboxLayout.addWidget(self.openbtn)
-    tboxLayout.addWidget(self.settingbtn)
+    tboxLayout.addWidget(settingbtn)
 
 
 
@@ -180,9 +207,16 @@ class Window(QWidget):
 
   def position_changed(self, position):
     self.slider.setValue(position)
+    mtime = QTime(0,0,0,0)
+    mtime = mtime.addMSecs(self.mediaPlayer.position())
+    self.lbl.setText(mtime.toString())
 
   def duration_changed(self, duration):
     self.slider.setRange(0, duration)
+    mtime = QTime(0,0,0,0)
+    mtime = mtime.addMSecs(self.mediaPlayer.duration())
+    self.elbl.setText(mtime.toString())
+
 
   def set_position(self, position):
     self.mediaPlayer.setPosition(position)
@@ -195,32 +229,27 @@ class Window(QWidget):
     self.mediaPlayer.setVolume(position)
   
   def volume_changed(self, position):
-    self.slider.setValue(position)
+    self.sld.setValue(position)
 
   def changeValue(self, value):
+
     self.volume = value
-    if value == 0:
+    if self.volume == 0:
       self.vlabel.setPixmap(QPixmap('icons/mute.png'))
-    elif 0 < value <= 30:
+    elif 0 < self.volume <= 30:
       self.vlabel.setPixmap(QPixmap('icons/min.png'))
-    elif 30 < value < 80:
+    elif 30 < self.volume < 80:
       self.vlabel.setPixmap(QPixmap('icons/med.png'))
     else:
       self.vlabel.setPixmap(QPixmap('icons/max.png'))
 
-  #def changeVolume(self, value):
-  #self.volume = value
 
   def volumeUp(self):
-    self.mediaPlayer.setVolume(self.mediaPlayer.volume() + 10)
-    self.set_volume(position=self.mediaPlayer.volume())
-    # self.volume_changed(position=self.mediaPlayer.volume())
+    vol= self.mediaPlayer.setVolume(self.mediaPlayer.volume() + 10)
     print("Volume: " + str(self.mediaPlayer.volume()))
     
   def volumeDown(self):
-    self.mediaPlayer.setVolume(self.mediaPlayer.volume() - 10)
-    self.set_volume(position=self.mediaPlayer.volume())
-    # self.volume_changed(position=self.mediaPlayer.volume())
+    vol=self.mediaPlayer.setVolume(self.mediaPlayer.volume() - 10)    
     print("Volume: " + str(self.mediaPlayer.volume()))
 
   def forwardSlider(self):
