@@ -122,8 +122,6 @@ class Window(QWidget):
     actionFile = self.displaybtn.addMenu(QIcon('icons/display.png'),'Setting')
     self.displaybtn.setStyleSheet('background-color : black; color : white')
     full = QAction('Full Screen', self)
-    full.setShortcut('F')
-    full.triggered.connect(self.handleFullscreen)
     actionFile.addAction(full)
     actionFile.addSeparator()
 
