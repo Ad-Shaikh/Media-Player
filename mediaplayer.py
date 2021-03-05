@@ -11,6 +11,7 @@ class InfoDialog(QDialog):
     super().__init__(parent=parent)
 
     self.setWindowTitle("Info (shortcuts)")
+    self.setGeometry(800, 400, 300, 300)
 
     self.layout = QVBoxLayout()
     m1 = QLabel("FullScreen     -  F / Double Click")
@@ -76,16 +77,16 @@ class Window(QWidget):
     actionFile.addSeparator()
 
     PlaybackMenu = QMenu('Playback', self)
-    Forward10 = QAction('Forward 10sec', self)
+    Forward10 = QAction(QIcon('icons/forward.png'),'Forward 10sec', self)
     PlaybackMenu.addAction(Forward10)
     Forward10.triggered.connect(self.forwardSlider)
-    Forward1 = QAction('Forward 1min', self)
+    Forward1 = QAction(QIcon('icons/forward.png'),'Forward 1min', self)
     PlaybackMenu.addAction(Forward1)
     Forward1.triggered.connect(self.forwardSlider10)    
-    Backward10 = QAction('Backward 10sec', self)
+    Backward10 = QAction(QIcon('icons/backward.png'),'Backward 10sec', self)
     PlaybackMenu.addAction(Backward10)
     Backward10.triggered.connect(self.backSlider)
-    Backward1 = QAction('Backward 1min', self)
+    Backward1 = QAction(QIcon('icons/backward.png'),'Backward 1min', self)
     PlaybackMenu.addAction(Backward1)
     Backward1.triggered.connect(self.backSlider10)
 
@@ -187,6 +188,7 @@ class Window(QWidget):
     self.slider.setFocusPolicy(Qt.NoFocus)
     self.slider.setRange(0,0)
     self.slider.sliderMoved.connect(self.set_position)
+    self.slider.setStyleSheet (self.stylesheet())
 
     self.lbl = QLineEdit('00:00:00')
     
@@ -213,6 +215,7 @@ class Window(QWidget):
     self.sld.sliderMoved.connect(self.set_volume)
     self.sld.setMaximumWidth(100);
     self.sld.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+    self.sld.setStyleSheet (self.stylesheet())
         
     # fullscreen toggle
     self.screenbtn = QPushButton()
@@ -434,6 +437,7 @@ class Window(QWidget):
     
   def hideSlider(self):
     self.openbtn.hide()
+    self.mediabtn.hide()
     self.settingbtn.hide()
     self.displaybtn.hide()
     self.bbtn.hide()
@@ -449,6 +453,7 @@ class Window(QWidget):
   
   def showSlider(self):
     self.openbtn.show()
+    self.mediabtn.show()
     self.settingbtn.show()
     self.displaybtn.show()
     self.bbtn.show()
@@ -461,6 +466,62 @@ class Window(QWidget):
     self.screenbtn.show()
     self.lbl.show()
     self.elbl.show() 
+  
+  def stylesheet(self):
+    return """
+            QSlider::handle:horizontal 
+            {
+            background: transparent;
+            width: 8px;
+            }
+
+            QSlider::groove:horizontal {
+            border: 1px solid #444444;
+            height: 8px;
+              background: qlineargradient(y1: 0, y2: 1,
+                            stop: 0 #2e3436, stop: 1.0 #000000);
+            }
+
+            QSlider::sub-page:horizontal {
+            background: qlineargradient( y1: 0, y2: 1,
+                stop: 0 #729fcf, stop: 1 #2a82da);
+            border: 1px solid #777;
+            height: 8px;
+            }
+
+            QSlider::handle:horizontal:hover {
+            background: #2a82da;
+            height: 8px;
+            width: 18px;
+            border: 1px solid #2e3436;
+            }
+
+            QSlider::sub-page:horizontal:disabled {
+            background: #bbbbbb;
+            border-color: #999999;
+            }
+
+            QSlider::add-page:horizontal:disabled {
+            background: #2a82da;
+            border-color: #999999;
+            }
+
+            QSlider::handle:horizontal:disabled {
+            background: #2a82da;
+            }
+
+            QLineEdit
+            {
+            background: black;
+            color: #585858;
+            border: 0px solid #076100;
+            font-size: 8pt;
+            font-weight: bold;
+            }
+            QAction QIcon{
+              size:15px;
+            }
+          """
 
 app = QApplication(sys.argv)
 window = Window()
