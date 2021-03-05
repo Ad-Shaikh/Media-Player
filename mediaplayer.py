@@ -365,10 +365,7 @@ class Window(QWidget):
 
   def set_volume(self, position):
     self.mediaPlayer.setVolume(position)
-  
-  # def volume_changed(self, position):
-  #   self.sld.setValue(position)
-
+    
   def changeValue(self, value):
     if self.mediaPlayer.isMuted():
       self.vlabel.setIcon(QIcon('icons/mute.png'))
