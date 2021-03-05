@@ -76,6 +76,7 @@ class Window(QWidget):
     self.mediabtn = QMenuBar()
     actionFile = self.mediabtn.addMenu(QIcon('icons/media.png'),'Media')
     self.mediabtn.setStyleSheet('background-color : black; color : white')
+    
     actionFile.addSeparator()
 
     PlaybackMenu = QMenu('Playback', self)
@@ -102,15 +103,10 @@ class Window(QWidget):
     VolumeMute.setShortcut('Ctrl+M')
     actionFile.addAction(VolumeMute)
     VolumeMute.triggered.connect(self.volumeMute)
-    
-    if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
-      Play = QAction(QIcon('icons/pause.png'),'Pause', self)
-      actionFile.addAction(Play)
-      Play.triggered.connect(self.play_video)
-    else:
-      Pause = QAction(QIcon('icons/play.png'),'Play', self)
-      actionFile.addAction(Pause)
-      Pause.triggered.connect(self.play_video)
+
+    self.Play = QAction(QIcon('icons/play.png'),'Play/Pause', self)
+    actionFile.addAction(self.Play)
+    self.Play.triggered.connect(self.play_video)
 
     actionFile.addMenu(PlaybackMenu)
     PlaybackMenu.setStyleSheet('background-color : black; color : white')
@@ -167,6 +163,10 @@ class Window(QWidget):
     self.settingbtn.setMaximumWidth(200)
     self.settingbtn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
 
+    self.stopbtn = QPushButton()
+    self.stopbtn.setStyleSheet('background-color : black')
+    self.stopbtn.setIcon(QIcon('icons/stop.png'))
+    self.stopbtn.clicked.connect(self.stop_video)
 
     # create button for playing
     self.playbtn = QPushButton()
@@ -244,8 +244,9 @@ class Window(QWidget):
     hboxLayout = QHBoxLayout()
 
     # set widgets to the hbox layout
-    hboxLayout.addWidget(self.bbtn)
     hboxLayout.addWidget(self.playbtn)
+    hboxLayout.addWidget(self.bbtn)
+    hboxLayout.addWidget(self.stopbtn)
     hboxLayout.addWidget(self.fbtn)
     hboxLayout.addWidget(self.lbl)
     hboxLayout.addWidget(self.slider)
@@ -276,8 +277,7 @@ class Window(QWidget):
 
     self.mediaPlayer.stateChanged.connect(self.mediastate_changed)
     self.mediaPlayer.positionChanged.connect(self.position_changed)
-    self.mediaPlayer.durationChanged.connect(self.duration_changed)
-    # self.mediaPlayer.positionChanged.connect(self.volume_changed)  
+    self.mediaPlayer.durationChanged.connect(self.duration_changed) 
 
     self.videowidget = True
       
@@ -299,8 +299,11 @@ class Window(QWidget):
     self.shortcut = QShortcut(QKeySequence(Qt.ShiftModifier +  Qt.Key_Left) , self)
     self.shortcut.activated.connect(self.backSlider10)
 
+  # function section   
 
-  # function section    
+  def stop_video(self):
+    if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
+      self.mediaPlayer.stop() 
   
   def open_info_dialog(self):
 
@@ -329,8 +332,14 @@ class Window(QWidget):
       self.playbtn.setIcon(
         QIcon('icons/pause.png')
       )
+      self.Play.setIcon(
+        QIcon('icons/pause.png')
+      )
     else:
       self.playbtn.setIcon(
+        QIcon('icons/play.png')
+      )
+      self.Play.setIcon(
         QIcon('icons/play.png')
       )
 
