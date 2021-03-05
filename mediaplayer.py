@@ -370,20 +370,31 @@ class Window(QWidget):
         self.vlabel.setIcon(QIcon('icons/max.png'))
 
   def volumeMute(self):
+    vol=self.mediaPlayer.volume()
     if self.mediaPlayer.isMuted():
       self.mediaPlayer.setMuted(False)
-      self.mediaPlayer.setVolume(100)
-      self.vlabel.setIcon(QIcon('icons/max.png'))
+      self.sld.setSliderPosition(int(self.mediaPlayer.volume()))
+      self.volume = vol
+      if self.volume == 0:
+        self.vlabel.setIcon(QIcon('icons/mute.png'))
+      elif 0 < self.volume <= 30:
+        self.vlabel.setIcon(QIcon('icons/min.png'))
+      elif 30 < self.volume < 80:
+        self.vlabel.setIcon(QIcon('icons/med.png'))
+      else:
+        self.vlabel.setIcon(QIcon('icons/max.png'))
     else:
       self.mediaPlayer.setMuted(True)
       self.vlabel.setIcon(QIcon('icons/mute.png'))
 
   def volumeUp(self):
     self.mediaPlayer.setVolume(self.mediaPlayer.volume() + 10)
+    self.sld.setSliderPosition(int(self.mediaPlayer.volume()))
     print("Volume: " + str(self.mediaPlayer.volume()))
     
   def volumeDown(self):
-    self.mediaPlayer.setVolume(self.mediaPlayer.volume() - 10)  
+    self.mediaPlayer.setVolume(self.mediaPlayer.volume() - 10)
+    self.sld.setSliderPosition(int(self.mediaPlayer.volume()))  
     print("Volume: " + str(self.mediaPlayer.volume()))
 
   def forwardSlider(self):
