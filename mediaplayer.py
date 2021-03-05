@@ -24,6 +24,7 @@ class InfoDialog(QDialog):
     m8 = QLabel("Backward 1min  -  Shift + ←")
     m9 = QLabel("Volume UP      -  ↑")
     m10 = QLabel("Volume UP     -  ↓")
+    m11 = QLabel("Mute          -  Ctrl + M")
     
     self.layout.addWidget(m1)
     self.layout.addWidget(m2)
@@ -35,6 +36,7 @@ class InfoDialog(QDialog):
     self.layout.addWidget(m8)
     self.layout.addWidget(m9)
     self.layout.addWidget(m10)
+    self.layout.addWidget(m11)
     self.setLayout(self.layout)
 
 class Window(QWidget):
@@ -97,6 +99,7 @@ class Window(QWidget):
     actionFile.addAction(VolumeDecrease)
     VolumeDecrease.triggered.connect(self.volumeDown)
     VolumeMute = QAction(QIcon('icons/mute.png'),'Volume Mute', self)
+    VolumeMute.setShortcut('Ctrl+M')
     actionFile.addAction(VolumeMute)
     VolumeMute.triggered.connect(self.volumeMute)
     
